@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import GroupCard from "@/components/molecules/GroupCard";
 import Loading from "@/components/ui/Loading";
@@ -9,11 +10,11 @@ import groupService from "@/services/api/groupService";
 import balanceService from "@/services/api/balanceService";
 
 const Groups = () => {
+  const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [balances, setBalances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   useEffect(() => {
     loadData();
   }, []);
@@ -84,7 +85,7 @@ const Groups = () => {
                 <GroupCard
                   group={group}
                   balance={getGroupBalance(group)}
-                  onClick={() => {}}
+onClick={() => navigate(`/groups/${group.Id}`)}
                 />
               </motion.div>
             ))}

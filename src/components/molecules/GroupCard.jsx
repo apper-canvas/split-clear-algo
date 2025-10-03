@@ -1,15 +1,14 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import React from "react";
 import ApperIcon from "@/components/ApperIcon";
 import Card from "@/components/atoms/Card";
 
-const GroupCard = ({ group, balance = 0, onClick }) => {
-  const formatAmount = (amount, currency = "INR") => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: currency,
-      minimumFractionDigits: 0
-    }).format(Math.abs(amount));
-  };
+function GroupCard({ group, balance = 0, onClick = () => {} }) {
+  function formatAmount(amount, currency = 'INR') {
+    const symbol = currency === 'INR' ? '₹' : '$';
+    return `${symbol}${Math.abs(amount).toFixed(2)}`;
+  }
 
   const getBalanceColor = () => {
     if (balance > 0) return "text-success";
@@ -23,12 +22,15 @@ const GroupCard = ({ group, balance = 0, onClick }) => {
     return "Settled up";
   };
 
-  return (
+return (
     <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+      onClick={onClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      className="cursor-pointer"
     >
-      <Card className="cursor-pointer" onClick={onClick}>
+      <Card>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h4 className="text-body font-semibold text-primary mb-1">
@@ -43,9 +45,9 @@ const GroupCard = ({ group, balance = 0, onClick }) => {
           </div>
           <ApperIcon name="ChevronRight" size={24} className="text-secondary ml-4" />
         </div>
-      </Card>
+</Card>
     </motion.div>
   );
-};
+}
 
 export default GroupCard;

@@ -1,7 +1,7 @@
-import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import GroupDetail from "@/components/pages/GroupDetail";
 import { ToastContainer } from "react-toastify";
-import GroupBalanceSummary from "@/components/pages/GroupBalanceSummary";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import SyncIndicator from "@/components/molecules/SyncIndicator";
 import BottomNavigation from "@/components/molecules/BottomNavigation";
 import History from "@/components/pages/History";
@@ -9,6 +9,7 @@ import Insights from "@/components/pages/Insights";
 import Groups from "@/components/pages/Groups";
 import Dashboard from "@/components/pages/Dashboard";
 import Settings from "@/components/pages/Settings";
+import GroupBalanceSummary from "@/components/pages/GroupBalanceSummary";
 import AddExpenseModal from "@/components/organisms/AddExpenseModal";
 import FloatingActionButton from "@/components/organisms/FloatingActionButton";
 import reminderService from "@/services/api/reminderService";
@@ -42,6 +43,7 @@ function App() {
 <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/groups/:id" element={<GroupDetail />} />
           <Route path="/group-balances" element={<GroupBalanceSummary />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/history" element={<History />} />
