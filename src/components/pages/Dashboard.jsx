@@ -23,8 +23,18 @@ const Dashboard = () => {
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [settlementBalance, setSettlementBalance] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
     loadData();
+    
+    const handleExpenseSettled = () => {
+      loadData();
+    };
+    
+    window.addEventListener('expenseSettled', handleExpenseSettled);
+    
+    return () => {
+      window.removeEventListener('expenseSettled', handleExpenseSettled);
+    };
   }, []);
 
   const loadData = async () => {

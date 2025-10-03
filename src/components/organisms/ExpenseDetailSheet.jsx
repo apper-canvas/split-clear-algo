@@ -33,10 +33,15 @@ const ExpenseDetailSheet = ({ expense, isOpen, onClose, onUpdate }) => {
     }
   };
 
-  const handleSettle = async () => {
+const handleSettle = async () => {
     try {
       await expenseService.settleExpense(expense.Id);
       toast.success("Expense marked as settled!");
+      
+      window.dispatchEvent(new window.CustomEvent('expenseSettled', {
+        detail: { expenseId: expense.Id, timestamp: Date.now() }
+      }));
+      
       onUpdate?.();
       onClose();
     } catch (error) {

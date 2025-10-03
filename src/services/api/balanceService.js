@@ -10,41 +10,41 @@ const balanceService = {
     return [...balances];
   },
 
-  getById: async (id) => {
-    await delay();
-    const balance = balances.find(b => b.Id === parseInt(id));
-    return balance ? { ...balance } : null;
-  },
-
   getSummary: async () => {
     await delay();
-    const youOwe = balances
-      .filter(b => b.amount < 0)
-      .reduce((sum, b) => sum + Math.abs(b.amount), 0);
+    let youOwe = 0;
+    let owedToYou = 0;
     
-    const owedToYou = balances
-      .filter(b => b.amount > 0)
-      .reduce((sum, b) => sum + b.amount, 0);
+    balances.forEach(balance => {
+      if (balance.userId === "You") {
+        youOwe += balance.amount;
+      } else if (balance.withUser === "You") {
+        owedToYou += balance.amount;
+      }
+    });
     
     const netBalance = owedToYou - youOwe;
     
-    return { youOwe, owedToYou, netBalance };
+    return {
+      youOwe,
+      owedToYou,
+      netBalance
+    };
   },
 
-  updateBalance: async (userId, withUser, amount) => {
+  addBalance: async (userId, withUser, amount) => {
     await delay();
-    const index = balances.findIndex(
+    const existingBalance = balances.find(
       b => b.userId === userId && b.withUser === withUser
     );
     
-    if (index !== -1) {
-      balances[index].amount += amount;
-      balances[index].lastUpdated = new Date().toISOString();
-      return { ...balances[index] };
+    if (existingBalance) {
+      existingBalance.amount += amount;
+      existingBalance.lastUpdated = new Date().toISOString();
+      return { ...existingBalance };
     } else {
-      const maxId = balances.length > 0 ? Math.max(...balances.map(b => b.Id)) : 0;
       const newBalance = {
-        Id: maxId + 1,
+        id: balances.length + 1,
         userId,
         withUser,
         amount,
