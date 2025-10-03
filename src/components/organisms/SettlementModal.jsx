@@ -67,7 +67,7 @@ const SettlementModal = ({ balance, isOpen, onClose, onSuccess }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+<div className="fixed inset-0 z-50 flex items-end sm:items-start sm:pt-20 justify-center">
           <motion.div
             className="absolute inset-0 bg-primary/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
@@ -76,7 +76,7 @@ const SettlementModal = ({ balance, isOpen, onClose, onSuccess }) => {
             onClick={handleClose}
           />
           <motion.div
-            className="relative w-full max-w-md bg-surface rounded-t-3xl sm:rounded-3xl shadow-2xl"
+className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-surface rounded-t-3xl sm:rounded-3xl shadow-2xl"
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
