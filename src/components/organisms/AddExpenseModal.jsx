@@ -304,10 +304,11 @@ setDescription("");
               </div>
             </div>
 
-            <div>
+<div>
               <label className="block text-body font-medium text-primary mb-2">
                 Split with
               </label>
+              <div className="flex gap-2">
                 <Input
                   placeholder="Add person"
                   value={contactInput}
