@@ -8,10 +8,13 @@ const Settings = () => {
   const [fontSize, setFontSize] = useState("medium");
   const [contrast, setContrast] = useState("normal");
   const [colorTheme, setColorTheme] = useState("standard");
-  const [notifications, setNotifications] = useState({
+const [notifications, setNotifications] = useState({
     expenseAdded: true,
     paymentReceived: true,
-    remindersDue: true
+    remindersDue: true,
+    settlementReminders: true,
+    reminderFrequency: 'weekly',
+    quietHours: { start: '22:00', end: '08:00' }
   });
 
   useEffect(() => {
@@ -20,14 +23,21 @@ const Settings = () => {
       const settings = JSON.parse(savedSettings);
       setFontSize(settings.fontSize || "medium");
       setContrast(settings.contrast || "normal");
-      setColorTheme(settings.colorTheme || "standard");
-      setNotifications(settings.notifications || notifications);
+setColorTheme(settings.colorTheme || "standard");
+      setNotifications(settings.notifications || {
+        expenseAdded: true,
+        paymentReceived: true,
+        remindersDue: true,
+        settlementReminders: true,
+        reminderFrequency: 'weekly',
+        quietHours: { start: '22:00', end: '08:00' }
+      });
     }
   }, []);
 
   useEffect(() => {
     applySettings();
-    saveSettings();
+saveSettings();
   }, [fontSize, contrast, colorTheme, notifications]);
 
   const applySettings = () => {
@@ -57,7 +67,7 @@ const Settings = () => {
     const settings = {
       fontSize,
       contrast,
-      colorTheme,
+colorTheme,
       notifications
     };
     localStorage.setItem("splitClearSettings", JSON.stringify(settings));
@@ -77,12 +87,46 @@ const Settings = () => {
     { value: "tritanopia", label: "Tritanopia", desc: "Blue-blind friendly" }
   ];
 
-  const handleNotificationToggle = (key) => {
+const handleNotificationToggle = (key) => {
     setNotifications(prev => ({
       ...prev,
       [key]: !prev[key]
     }));
-    toast.success("Notification preference updated");
+    
+    if (key === 'settlementReminders' && !notifications[key]) {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            toast.success("Settlement reminders enabled with notifications");
+          } else {
+            toast.info("Settlement reminders enabled (in-app only)");
+          }
+        });
+      } else {
+        toast.success("Notification preference updated");
+      }
+    } else {
+      toast.success("Notification preference updated");
+    }
+  };
+
+  const handleFrequencyChange = (e) => {
+    setNotifications(prev => ({
+      ...prev,
+      reminderFrequency: e.target.value
+    }));
+    toast.success("Reminder frequency updated");
+  };
+
+  const handleQuietHoursChange = (type, value) => {
+    setNotifications(prev => ({
+      ...prev,
+      quietHours: {
+        ...prev.quietHours,
+        [type]: value
+      }
+    }));
+    toast.success("Quiet hours updated");
   };
 
   return (
@@ -205,7 +249,7 @@ const Settings = () => {
           </Card>
         </div>
 
-        <div>
+<div>
           <h2 className="text-h2 font-semibold text-primary mb-4">Notifications</h2>
           <Card>
             <div className="space-y-4">
@@ -267,6 +311,82 @@ const Settings = () => {
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 </motion.button>
+              </div>
+
+              <div className="border-t border-secondary/10 pt-4 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-body font-medium text-primary">Settlement Reminders</p>
+                    <p className="text-caption text-secondary">Periodic reminders for pending settlements</p>
+                  </div>
+                  <motion.button
+                    onClick={() => handleNotificationToggle("settlementReminders")}
+                    className={`w-12 h-6 rounded-full transition-colors ${
+                      notifications.settlementReminders ? "bg-accent" : "bg-secondary/30"
+                    }`}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <motion.div
+                      className="w-5 h-5 bg-surface rounded-full shadow-md"
+                      animate={{ x: notifications.settlementReminders ? 26 : 2 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  </motion.button>
+                </div>
+
+                {notifications.settlementReminders && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-4 pl-4 border-l-2 border-accent/20"
+                  >
+                    <div>
+                      <label className="block text-caption font-medium text-primary mb-2">
+                        Reminder Frequency
+                      </label>
+                      <select
+                        value={notifications.reminderFrequency}
+                        onChange={handleFrequencyChange}
+                        className="w-full px-3 py-2 bg-surface border border-secondary/20 rounded-lg text-body text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="bi-weekly">Bi-weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-caption font-medium text-primary mb-2">
+                        Quiet Hours
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <label className="block text-caption text-secondary mb-1">Start</label>
+                          <input
+                            type="time"
+                            value={notifications.quietHours.start}
+                            onChange={(e) => handleQuietHoursChange('start', e.target.value)}
+                            className="w-full px-3 py-2 bg-surface border border-secondary/20 rounded-lg text-body text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-caption text-secondary mb-1">End</label>
+                          <input
+                            type="time"
+                            value={notifications.quietHours.end}
+                            onChange={(e) => handleQuietHoursChange('end', e.target.value)}
+                            className="w-full px-3 py-2 bg-surface border border-secondary/20 rounded-lg text-body text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-caption text-secondary mt-2">
+                        No notifications will be sent during these hours
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </Card>

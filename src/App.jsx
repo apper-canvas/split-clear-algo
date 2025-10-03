@@ -1,7 +1,7 @@
 import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import GroupBalanceSummary from "@/components/pages/GroupBalanceSummary";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SyncIndicator from "@/components/molecules/SyncIndicator";
 import BottomNavigation from "@/components/molecules/BottomNavigation";
 import History from "@/components/pages/History";
@@ -11,11 +11,22 @@ import Dashboard from "@/components/pages/Dashboard";
 import Settings from "@/components/pages/Settings";
 import AddExpenseModal from "@/components/organisms/AddExpenseModal";
 import FloatingActionButton from "@/components/organisms/FloatingActionButton";
-
+import reminderService from "@/services/api/reminderService";
 function App() {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState("synced");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const checkReminders = async () => {
+      await reminderService.checkAndNotifySettlements();
+    };
+
+    checkReminders();
+    const intervalId = setInterval(checkReminders, 30 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleExpenseAdded = () => {
     setSyncStatus("syncing");
@@ -23,7 +34,6 @@ function App() {
       setSyncStatus("synced");
     }, 1000);
   };
-
   return (
 <BrowserRouter>
       <div className="min-h-screen bg-background font-body">
