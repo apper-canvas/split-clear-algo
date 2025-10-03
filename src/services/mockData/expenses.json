@@ -1,0 +1,156 @@
+[
+  {
+    "Id": 1,
+    "description": "Lunch at Cafe Bliss",
+    "totalAmount": 850,
+    "currency": "INR",
+    "date": "2024-01-15T12:30:00Z",
+    "paidBy": "You",
+    "groupId": 1,
+    "items": [
+      {
+        "name": "Paneer Tikka",
+        "price": 350,
+        "quantity": 2,
+        "assignedTo": ["You", "Neha"]
+      },
+      {
+        "name": "Dal Makhani",
+        "price": 250,
+        "quantity": 1,
+        "assignedTo": ["Samir"]
+      },
+      {
+        "name": "Naan",
+        "price": 150,
+        "quantity": 3,
+        "assignedTo": ["You", "Neha", "Samir"]
+      },
+      {
+        "name": "Cold Coffee",
+        "price": 100,
+        "quantity": 1,
+        "assignedTo": ["Neha"]
+      }
+    ],
+    "splits": {
+      "You": 333.33,
+      "Neha": 333.33,
+      "Samir": 183.34
+    },
+    "settled": false,
+    "createdOffline": false,
+    "synced": true
+  },
+  {
+    "Id": 2,
+    "description": "Movie tickets",
+    "totalAmount": 1200,
+    "currency": "INR",
+    "date": "2024-01-14T18:00:00Z",
+    "paidBy": "Neha",
+    "groupId": 1,
+    "items": [
+      {
+        "name": "Movie Tickets",
+        "price": 300,
+        "quantity": 4,
+        "assignedTo": ["You", "Neha", "Samir", "Priya"]
+      }
+    ],
+    "splits": {
+      "You": 300,
+      "Neha": 0,
+      "Samir": 300,
+      "Priya": 300
+    },
+    "settled": false,
+    "createdOffline": false,
+    "synced": true
+  },
+  {
+    "Id": 3,
+    "description": "Grocery shopping",
+    "totalAmount": 2500,
+    "currency": "INR",
+    "date": "2024-01-13T10:15:00Z",
+    "paidBy": "You",
+    "groupId": 2,
+    "items": [
+      {
+        "name": "Vegetables",
+        "price": 800,
+        "quantity": 1,
+        "assignedTo": ["You", "Rohan"]
+      },
+      {
+        "name": "Rice",
+        "price": 1200,
+        "quantity": 1,
+        "assignedTo": ["You", "Rohan"]
+      },
+      {
+        "name": "Snacks",
+        "price": 500,
+        "quantity": 1,
+        "assignedTo": ["You", "Rohan"]
+      }
+    ],
+    "splits": {
+      "You": 1250,
+      "Rohan": 1250
+    },
+    "settled": true,
+    "createdOffline": false,
+    "synced": true
+  },
+  {
+    "Id": 4,
+    "description": "Coffee shop",
+    "totalAmount": 450,
+    "currency": "INR",
+    "date": "2024-01-12T16:45:00Z",
+    "paidBy": "Samir",
+    "groupId": 1,
+    "items": [
+      {
+        "name": "Cappuccino",
+        "price": 150,
+        "quantity": 3,
+        "assignedTo": ["You", "Neha", "Samir"]
+      }
+    ],
+    "splits": {
+      "You": 150,
+      "Neha": 150,
+      "Samir": 0
+    },
+    "settled": false,
+    "createdOffline": false,
+    "synced": true
+  },
+  {
+    "Id": 5,
+    "description": "Uber ride home",
+    "totalAmount": 320,
+    "currency": "INR",
+    "date": "2024-01-11T22:30:00Z",
+    "paidBy": "You",
+    "groupId": 1,
+    "items": [
+      {
+        "name": "Uber Ride",
+        "price": 320,
+        "quantity": 1,
+        "assignedTo": ["You", "Neha"]
+      }
+    ],
+    "splits": {
+      "You": 160,
+      "Neha": 160
+    },
+    "settled": false,
+    "createdOffline": false,
+    "synced": true
+  }
+]

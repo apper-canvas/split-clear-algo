@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "userId": "You",
+    "withUser": "Neha",
+    "amount": -323.33,
+    "currency": "INR",
+    "lastUpdated": "2024-01-15T12:30:00Z"
+  },
+  {
+    "Id": 2,
+    "userId": "You",
+    "withUser": "Samir",
+    "amount": -333.34,
+    "currency": "INR",
+    "lastUpdated": "2024-01-15T12:30:00Z"
+  },
+  {
+    "Id": 3,
+    "userId": "You",
+    "withUser": "Priya",
+    "amount": 300,
+    "currency": "INR",
+    "lastUpdated": "2024-01-14T18:00:00Z"
+  },
+  {
+    "Id": 4,
+    "userId": "You",
+    "withUser": "Rohan",
+    "amount": 0,
+    "currency": "INR",
+    "lastUpdated": "2024-01-13T10:15:00Z"
+  }
+]

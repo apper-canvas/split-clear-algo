@@ -1,0 +1,12 @@
+[
+  {
+    "Id": 1,
+    "fromUser": "Rohan",
+    "toUser": "You",
+    "amount": 1250,
+    "currency": "INR",
+    "method": "UPI",
+    "date": "2024-01-13T15:00:00Z",
+    "relatedExpenses": [3]
+  }
+]

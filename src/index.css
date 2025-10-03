@@ -1,0 +1,92 @@
+@import "react-toastify/dist/ReactToastify.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Toast Customization */
+.Toastify__toast-container {
+  z-index: 9999;
+  font-family: "Inter", sans-serif;
+}
+
+.Toastify__toast {
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-height: auto;
+}
+
+.Toastify__toast--success {
+  background-color: #27AE60;
+}
+
+.Toastify__toast--error {
+  background-color: #E74C3C;
+}
+
+.Toastify__toast--info {
+  background-color: #3498DB;
+}
+
+/* Accessibility Font Sizes */
+.font-size-small {
+  font-size: 14px;
+}
+
+.font-size-medium {
+  font-size: 16px;
+}
+
+.font-size-large {
+  font-size: 20px;
+}
+
+.font-size-extra-large {
+  font-size: 24px;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  filter: contrast(1.2);
+}
+
+.high-contrast body {
+  background-color: #F0F0F0;
+}
+
+.high-contrast .text-primary {
+  color: #000000;
+}
+
+/* Color Blind Themes */
+.theme-protanopia {
+  --color-success: #3498DB;
+  --color-error: #F39C12;
+}
+
+.theme-deuteranopia {
+  --color-success: #9B59B6;
+  --color-error: #3498DB;
+}
+
+.theme-tritanopia {
+  --color-success: #E74C3C;
+  --color-error: #16A085;
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "name": "Usual Group",
+    "members": ["You", "Neha", "Samir"],
+    "defaultSplit": "equal",
+    "currency": "INR",
+    "lastUsed": "2024-01-15T12:30:00Z"
+  },
+  {
+    "Id": 2,
+    "name": "Roommates",
+    "members": ["You", "Rohan"],
+    "defaultSplit": "equal",
+    "currency": "INR",
+    "lastUsed": "2024-01-13T10:15:00Z"
+  },
+  {
+    "Id": 3,
+    "name": "Office Lunch",
+    "members": ["You", "Amit", "Kavya", "Priya"],
+    "defaultSplit": "equal",
+    "currency": "INR",
+    "lastUsed": "2024-01-10T13:00:00Z"
+  },
+  {
+    "Id": 4,
+    "name": "Weekend Trip",
+    "members": ["You", "Neha", "Samir", "Rohan", "Priya"],
+    "defaultSplit": "equal",
+    "currency": "INR",
+    "lastUsed": "2024-01-08T09:00:00Z"
+  }
+]
