@@ -48,8 +48,14 @@ const ExpenseItem = ({ expense, onClick }) => {
             )}
           </div>
         </div>
-        <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
           <div className="flex items-center gap-2 flex-wrap">
+            {expense.category && (
+              <Badge variant="info">
+                <ApperIcon name="Tag" size={12} className="mr-1" />
+                {expense.category}
+              </Badge>
+            )}
             {expense.items.length > 1 && (
               <Badge variant="info">
                 <ApperIcon name="List" size={12} className="mr-1" />

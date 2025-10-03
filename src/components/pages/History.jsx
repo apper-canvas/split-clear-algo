@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
 import ExpenseItem from "@/components/molecules/ExpenseItem";
-import Loading from "@/components/ui/Loading";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import Input from "@/components/atoms/Input";
-import ApperIcon from "@/components/ApperIcon";
-import expenseService from "@/services/api/expenseService";
+import Loading from "@/components/ui/Loading";
 import ExpenseDetailSheet from "@/components/organisms/ExpenseDetailSheet";
+import Input from "@/components/atoms/Input";
+import expenseService from "@/services/api/expenseService";
 
 const History = () => {
   const [expenses, setExpenses] = useState([]);
@@ -15,7 +15,9 @@ const History = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
+const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
 
   useEffect(() => {
@@ -23,8 +25,8 @@ const History = () => {
   }, []);
 
   useEffect(() => {
-    applyFilters();
-  }, [expenses, searchQuery, filterStatus]);
+applyFilters();
+  }, [expenses, searchQuery, filterStatus, filterCategory]);
 
   const loadData = async () => {
     setLoading(true);
@@ -43,7 +45,7 @@ const History = () => {
   const applyFilters = () => {
     let filtered = [...expenses];
 
-    if (searchQuery) {
+if (searchQuery) {
       filtered = filtered.filter(expense =>
         expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         expense.paidBy.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,14 +58,26 @@ const History = () => {
       filtered = filtered.filter(e => !e.settled);
     }
 
+    if (filterCategory !== "all") {
+      filtered = filtered.filter(e => e.category === filterCategory);
+    }
+
     setFilteredExpenses(filtered);
   };
 
-  const filterButtons = [
+const filterButtons = [
     { id: "all", label: "All", icon: "List" },
     { id: "pending", label: "Pending", icon: "Clock" },
     { id: "settled", label: "Settled", icon: "CheckCircle" }
   ];
+
+  const categories = [
+    "Food", "Transport", "Entertainment", "Shopping", "Bills", "Travel", "Health", "Other"
+  ];
+
+  const getCategoryCount = (category) => {
+    return expenses.filter(e => e.category === category).length;
+  };
 
   if (loading) return <Loading variant="list" />;
   if (error) return <Error message={error} onRetry={loadData} />;
@@ -115,8 +129,72 @@ const History = () => {
               </motion.button>
             ))}
           </div>
+</div>
+
+        {/* Category Filter */}
+        <div className="mb-6">
+          <div className="relative">
+            <button
+              onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+              className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${
+                filterCategory !== "all"
+                  ? "bg-accent text-surface"
+                  : "bg-surface text-secondary border border-secondary/20 hover:border-accent/50"
+              }`}
+            >
+              <ApperIcon name="Tag" size={16} />
+              <span>Category</span>
+              {filterCategory !== "all" && (
+                <span className="ml-1">: {filterCategory}</span>
+              )}
+              <ApperIcon 
+                name={showCategoryDropdown ? "ChevronUp" : "ChevronDown"} 
+                size={16} 
+              />
+            </button>
+
+            <AnimatePresence>
+              {showCategoryDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute z-10 mt-2 bg-surface border border-secondary/20 rounded-xl shadow-lg overflow-hidden min-w-[200px]"
+                >
+                  <button
+                    onClick={() => {
+                      setFilterCategory("all");
+                      setShowCategoryDropdown(false);
+                    }}
+                    className={`w-full px-4 py-3 text-left hover:bg-accent/5 transition-colors flex items-center justify-between ${
+                      filterCategory === "all" ? "bg-accent/10 text-accent font-medium" : ""
+                    }`}
+                  >
+                    <span>All Categories</span>
+                    <span className="text-caption text-secondary">{expenses.length}</span>
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setFilterCategory(cat);
+                        setShowCategoryDropdown(false);
+                      }}
+                      className={`w-full px-4 py-3 text-left hover:bg-accent/5 transition-colors flex items-center justify-between ${
+                        filterCategory === cat ? "bg-accent/10 text-accent font-medium" : ""
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span className="text-caption text-secondary">{getCategoryCount(cat)}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
+{/* Expenses List */}
         {filteredExpenses.length === 0 ? (
           <Empty
             icon="Receipt"

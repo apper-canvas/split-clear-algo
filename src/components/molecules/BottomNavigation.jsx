@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
+import React from "react";
 import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
 
@@ -13,7 +14,7 @@ const BottomNavigation = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-secondary/10 z-50 safe-area-bottom">
-      <div className="flex items-center justify-around h-16 px-2">
+<div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => (
           <NavLink
             key={item.to}

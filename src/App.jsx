@@ -3,6 +3,7 @@ import { ToastContainer } from "react-toastify";
 import { useState } from "react";
 import Dashboard from "@/components/pages/Dashboard";
 import Groups from "@/components/pages/Groups";
+import Insights from "@/components/pages/Insights";
 import History from "@/components/pages/History";
 import Settings from "@/components/pages/Settings";
 import BottomNavigation from "@/components/molecules/BottomNavigation";
@@ -23,9 +24,10 @@ function App() {
       <div className="min-h-screen bg-background font-body">
         <SyncIndicator status={syncStatus} />
         
-        <Routes>
+<Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/insights" element={<Insights />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

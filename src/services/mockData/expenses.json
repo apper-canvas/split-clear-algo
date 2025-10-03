@@ -4,6 +4,7 @@
     "description": "Lunch at Cafe Bliss",
     "totalAmount": 850,
     "currency": "INR",
+    "category": "Food",
     "date": "2024-01-15T12:30:00Z",
     "paidBy": "You",
     "groupId": 1,
@@ -42,11 +43,12 @@
     "createdOffline": false,
     "synced": true
   },
-  {
+{
     "Id": 2,
     "description": "Movie tickets",
     "totalAmount": 1200,
     "currency": "INR",
+    "category": "Entertainment",
     "date": "2024-01-14T18:00:00Z",
     "paidBy": "Neha",
     "groupId": 1,
@@ -68,11 +70,12 @@
     "createdOffline": false,
     "synced": true
   },
-  {
+{
     "Id": 3,
     "description": "Grocery shopping",
     "totalAmount": 2500,
     "currency": "INR",
+    "category": "Shopping",
     "date": "2024-01-13T10:15:00Z",
     "paidBy": "You",
     "groupId": 2,
@@ -104,11 +107,12 @@
     "createdOffline": false,
     "synced": true
   },
-  {
+{
     "Id": 4,
     "description": "Coffee shop",
     "totalAmount": 450,
     "currency": "INR",
+    "category": "Food",
     "date": "2024-01-12T16:45:00Z",
     "paidBy": "Samir",
     "groupId": 1,
@@ -129,11 +133,12 @@
     "createdOffline": false,
     "synced": true
   },
-  {
+{
     "Id": 5,
     "description": "Uber ride home",
     "totalAmount": 320,
     "currency": "INR",
+    "category": "Transport",
     "date": "2024-01-11T22:30:00Z",
     "paidBy": "You",
     "groupId": 1,

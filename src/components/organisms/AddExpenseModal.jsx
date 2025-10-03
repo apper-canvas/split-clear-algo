@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import ApperIcon from "@/components/ApperIcon";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import ContactChip from "@/components/molecules/ContactChip";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import ContactChip from "@/components/molecules/ContactChip";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
 import groupService from "@/services/api/groupService";
 import expenseService from "@/services/api/expenseService";
-
 const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
   const [isListening, setIsListening] = useState(false);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("INR");
+const [currency, setCurrency] = useState("INR");
+  const [category, setCategory] = useState("Food");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [contactInput, setContactInput] = useState("");
-
   useEffect(() => {
     if (isOpen) {
       loadGroups();
@@ -70,7 +70,7 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
     setIsListening(true);
     setTimeout(() => {
       const sampleInput = "Lunch ₹850 with Neha and Samir";
-      parseNaturalLanguage(sampleInput);
+parseNaturalLanguage(sampleInput);
       setDescription("Lunch");
       setAmount("850");
       setSelectedContacts(["Neha", "Samir"]);
@@ -102,9 +102,9 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
     setCurrency(group.currency);
   };
 
-  const handleSubmit = async () => {
-    if (!description || !amount || selectedContacts.length === 0) {
-      toast.error("Please fill all required fields");
+const handleSubmit = async () => {
+    if (!description || !amount || !category || selectedContacts.length === 0) {
+      toast.error("Please fill all required fields including category");
       return;
     }
 
@@ -144,13 +144,25 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    setDescription("");
+setDescription("");
     setAmount("");
     setCurrency("INR");
+    setCategory("Food");
     setSelectedContacts([]);
     setContactInput("");
     onClose();
   };
+
+  const categories = [
+    { value: "Food", icon: "ShoppingCart" },
+    { value: "Transport", icon: "Car" },
+    { value: "Entertainment", icon: "Film" },
+    { value: "Shopping", icon: "ShoppingBag" },
+    { value: "Bills", icon: "Receipt" },
+    { value: "Travel", icon: "Plane" },
+    { value: "Health", icon: "Heart" },
+    { value: "Other", icon: "Tag" }
+  ];
 
   if (!isOpen) return null;
 
@@ -235,13 +247,67 @@ const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
                   <option value="GBP">£ GBP</option>
                 </select>
               </div>
+</div>
+
+            {/* Category Selector */}
+            <div>
+              <label className="block text-caption text-secondary mb-2 font-medium">
+                Category *
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="w-full px-4 py-3 bg-surface border border-secondary/20 rounded-xl text-left flex items-center justify-between hover:border-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <ApperIcon 
+                      name={categories.find(c => c.value === category)?.icon || "Tag"} 
+                      size={18} 
+                      className="text-accent" 
+                    />
+                    <span className="text-body">{category}</span>
+                  </div>
+                  <ApperIcon 
+                    name={showCategoryDropdown ? "ChevronUp" : "ChevronDown"} 
+                    size={18} 
+                  />
+                </button>
+                <AnimatePresence>
+                  {showCategoryDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full mt-2 bg-surface border border-secondary/20 rounded-xl shadow-lg overflow-hidden"
+                    >
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => {
+                            setCategory(cat.value);
+                            setShowCategoryDropdown(false);
+                          }}
+                          className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-accent/5 transition-colors ${
+                            category === cat.value ? "bg-accent/10" : ""
+                          }`}
+                        >
+                          <ApperIcon name={cat.icon} size={18} className="text-accent" />
+                          <span className="text-body">{cat.value}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+)}
+                </AnimatePresence>
+              </div>
             </div>
 
             <div>
               <label className="block text-body font-medium text-primary mb-2">
                 Split with
               </label>
-              <div className="flex gap-2 mb-3">
                 <Input
                   placeholder="Add person"
                   value={contactInput}

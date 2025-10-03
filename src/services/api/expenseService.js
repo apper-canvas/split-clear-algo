@@ -1,5 +1,4 @@
-import expensesData from "../mockData/expenses.json";
-
+import expensesData from "@/services/mockData/expenses.json";
 let expenses = [...expensesData];
 
 const delay = () => new Promise(resolve => setTimeout(resolve, 300));
@@ -16,12 +15,13 @@ const expenseService = {
     return expense ? { ...expense } : null;
   },
 
-  create: async (expense) => {
+create: async (expense) => {
     await delay();
     const maxId = expenses.length > 0 ? Math.max(...expenses.map(e => e.Id)) : 0;
     const newExpense = {
       ...expense,
       Id: maxId + 1,
+      category: expense.category || "Other",
       date: new Date().toISOString(),
       settled: false,
       createdOffline: false,
@@ -63,7 +63,7 @@ const expenseService = {
     return expenses.filter(e => e.groupId === parseInt(groupId));
   },
 
-  settleExpense: async (id) => {
+settleExpense: async (id) => {
     await delay();
     const index = expenses.findIndex(e => e.Id === parseInt(id));
     if (index !== -1) {
@@ -71,6 +71,60 @@ const expenseService = {
       return { ...expenses[index] };
     }
     return null;
+  },
+
+  getByCategory: async (category) => {
+    await delay();
+    return expenses.filter(e => e.category === category).map(e => ({ ...e }));
+  },
+  getCategoryTotals: async () => {
+    await delay();
+    const totals = {};
+    expenses.forEach(expense => {
+      const category = expense.category || "Other";
+      totals[category] = (totals[category] || 0) + expense.totalAmount;
+    });
+    return totals;
+  },
+
+  getCollaboratorFrequency: async () => {
+    await delay();
+    const frequency = {};
+    expenses.forEach(expense => {
+      if (expense.splits) {
+        Object.keys(expense.splits).forEach(person => {
+          if (person !== "You") {
+            frequency[person] = (frequency[person] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(frequency)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+  },
+
+  getDailySpending: async (days = 7) => {
+    await delay();
+    const now = new Date();
+    const dailyTotals = {};
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      dailyTotals[dateStr] = 0;
+    }
+
+    expenses.forEach(expense => {
+      const expenseDate = new Date(expense.date).toISOString().split('T')[0];
+      if (dailyTotals.hasOwnProperty(expenseDate)) {
+        dailyTotals[expenseDate] += expense.totalAmount;
+      }
+    });
+
+    return dailyTotals;
   }
 };
 
