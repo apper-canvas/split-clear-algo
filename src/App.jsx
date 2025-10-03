@@ -12,8 +12,9 @@ import AddExpenseModal from "@/components/organisms/AddExpenseModal";
 import SyncIndicator from "@/components/molecules/SyncIndicator";
 
 function App() {
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState("synced");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleExpenseAdded = () => {
     window.location.reload();
@@ -30,9 +31,9 @@ function App() {
           <Route path="/insights" element={<Insights />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
-        </Routes>
+</Routes>
 
-        <BottomNavigation />
+        <BottomNavigation isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
         <FloatingActionButton onClick={() => setIsAddExpenseOpen(true)} />
         
         <AddExpenseModal
