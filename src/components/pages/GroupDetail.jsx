@@ -17,15 +17,15 @@ import balanceService from '@/services/api/balanceService';
 function GroupDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [group, setGroup] = useState(null);
+const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedExpense, setSelectedExpense] = useState(null);
-
   useEffect(() => {
-    loadGroupData();
+loadGroupData();
   }, [id]);
 
   async function loadGroupData() {
@@ -33,10 +33,11 @@ function GroupDetail() {
       setLoading(true);
       setError('');
       
-      const [groupData, allExpenses, allBalances] = await Promise.all([
+      const [groupData, allExpenses, allBalances, allGroupsData] = await Promise.all([
         groupService.getById(parseInt(id)),
         expenseService.getAll(),
-        balanceService.getAll()
+        balanceService.getAll(),
+        groupService.getAll()
       ]);
 
       if (!groupData) {
@@ -58,6 +59,7 @@ function GroupDetail() {
       setGroup(groupData);
       setExpenses(groupExpenses);
       setBalances(groupBalances);
+      setAllGroups(allGroupsData);
       toast.success('Group details loaded successfully');
     } catch (err) {
       const errorMessage = err.message || 'Failed to load group details';
@@ -65,6 +67,26 @@ function GroupDetail() {
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function getCurrentGroupIndex() {
+    return allGroups.findIndex(g => g.Id === parseInt(id));
+  }
+
+  function handlePreviousGroup() {
+    const currentIndex = getCurrentGroupIndex();
+    if (currentIndex > 0) {
+      const previousGroup = allGroups[currentIndex - 1];
+      navigate(`/groups/${previousGroup.Id}`);
+    }
+  }
+
+  function handleNextGroup() {
+    const currentIndex = getCurrentGroupIndex();
+    if (currentIndex < allGroups.length - 1) {
+      const nextGroup = allGroups[currentIndex + 1];
+      navigate(`/groups/${nextGroup.Id}`);
     }
   }
 
@@ -92,7 +114,7 @@ function GroupDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
+{/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -108,7 +130,7 @@ function GroupDetail() {
             >
               <ApperIcon name="ArrowLeft" size={24} className="text-primary" />
             </button>
-            <div>
+            <div className="flex-1">
               <h1 className="text-h1 font-display font-semibold text-primary">
                 {group.name}
               </h1>
@@ -116,6 +138,26 @@ function GroupDetail() {
                 {group.members.length} members • {expenses.length} expenses
               </p>
             </div>
+            {allGroups.length > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePreviousGroup}
+                  disabled={getCurrentGroupIndex() === 0}
+                  className="p-2 hover:bg-accent/10 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Previous group"
+                >
+                  <ApperIcon name="ChevronLeft" size={20} className="text-primary" />
+                </button>
+                <button
+                  onClick={handleNextGroup}
+                  disabled={getCurrentGroupIndex() === allGroups.length - 1}
+                  className="p-2 hover:bg-accent/10 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Next group"
+                >
+                  <ApperIcon name="ChevronRight" size={20} className="text-primary" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Quick Stats */}
