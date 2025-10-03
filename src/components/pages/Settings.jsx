@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Card from "@/components/atoms/Card";
-import ApperIcon from "@/components/ApperIcon";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Card from "@/components/atoms/Card";
 
-const Settings = () => {
+const Settings = ({ suppressNotifications = false }) => {
   const [fontSize, setFontSize] = useState("medium");
   const [contrast, setContrast] = useState("normal");
   const [colorTheme, setColorTheme] = useState("standard");
-const [notifications, setNotifications] = useState({
+  const [notifications, setNotifications] = useState({
     expenseAdded: true,
     paymentReceived: true,
     remindersDue: true,
@@ -23,7 +23,7 @@ const [notifications, setNotifications] = useState({
       const settings = JSON.parse(savedSettings);
       setFontSize(settings.fontSize || "medium");
       setContrast(settings.contrast || "normal");
-setColorTheme(settings.colorTheme || "standard");
+      setColorTheme(settings.colorTheme || "standard");
       setNotifications(settings.notifications || {
         expenseAdded: true,
         paymentReceived: true,
@@ -35,9 +35,9 @@ setColorTheme(settings.colorTheme || "standard");
     }
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     applySettings();
-saveSettings();
+    saveSettings();
   }, [fontSize, contrast, colorTheme, notifications]);
 
   const applySettings = () => {
@@ -63,11 +63,11 @@ saveSettings();
     }
   };
 
-  const saveSettings = () => {
+const saveSettings = () => {
     const settings = {
       fontSize,
       contrast,
-colorTheme,
+      colorTheme,
       notifications
     };
     localStorage.setItem("splitClearSettings", JSON.stringify(settings));
@@ -86,12 +86,15 @@ colorTheme,
     { value: "deuteranopia", label: "Deuteranopia", desc: "Green-blind friendly" },
     { value: "tritanopia", label: "Tritanopia", desc: "Blue-blind friendly" }
   ];
-
 const handleNotificationToggle = (key) => {
     setNotifications(prev => ({
       ...prev,
       [key]: !prev[key]
     }));
+    
+    if (suppressNotifications) {
+      return;
+    }
     
     if (key === 'settlementReminders' && !notifications[key]) {
       if ('Notification' in window && Notification.permission === 'default') {
@@ -247,9 +250,9 @@ const handleNotificationToggle = (key) => {
               ))}
             </div>
           </Card>
-        </div>
+</div>
 
-<div>
+        <div>
           <h2 className="text-h2 font-semibold text-primary mb-4">Notifications</h2>
           <Card>
             <div className="space-y-4">
