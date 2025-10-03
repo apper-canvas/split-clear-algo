@@ -7,19 +7,31 @@ import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import groupService from "@/services/api/groupService";
 import expenseService from "@/services/api/expenseService";
-const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
+const AddExpenseModal = ({ isOpen, onClose, onSuccess, groupId }) => {
   const [isListening, setIsListening] = useState(false);
   const [description, setDescription] = useState("");
-const [amount, setAmount] = useState("");
-const [currency, setCurrency] = useState("INR");
-  const [category, setCategory] = useState("Food");
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [contacts, setContacts] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [loading, setLoading] = useState(false);
   const [contactInput, setContactInput] = useState("");
   const [splitMethod, setSplitMethod] = useState("equal");
   const [customSplits, setCustomSplits] = useState({});
+  const [currency, setCurrency] = useState("INR");
+  const [category, setCategory] = useState("Food");
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+  // Pre-select group if groupId provided
+  useEffect(() => {
+    if (groupId && groups.length > 0) {
+      const group = groups.find(g => g.Id === parseInt(groupId));
+      if (group) {
+        setSelectedGroup(group);
+      }
+    }
+  }, [groupId, groups]);
   useEffect(() => {
     if (isOpen) {
       loadGroups();
@@ -102,85 +114,98 @@ parseNaturalLanguage(sampleInput);
     const contacts = group.members.filter(m => m !== "You");
     setSelectedContacts(contacts);
     setCurrency(group.currency);
-  };
+};
+};
 
-const handleSubmit = async () => {
-    if (!description || !amount || !category || selectedContacts.length === 0) {
-      toast.error("Please fill all required fields including category");
-      return;
-    }
-
-    const totalAmount = parseFloat(amount);
-    let splits = {};
-
-    if (splitMethod === "equal") {
-      const splitAmount = totalAmount / (selectedContacts.length + 1);
-      splits = { "You": splitAmount };
-      selectedContacts.forEach(contact => {
-        splits[contact] = splitAmount;
-      });
-    } else if (splitMethod === "itemized") {
-      const customTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
-      if (Math.abs(customTotal - totalAmount) > 0.01) {
-        toast.error(`Itemized amounts (${customTotal.toFixed(2)}) must equal total amount (${totalAmount.toFixed(2)})`);
-        return;
-      }
-      splits = { ...customSplits };
-      if (!splits["You"]) splits["You"] = 0;
-    } else if (splitMethod === "percentage") {
-      const percentageTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
-      if (Math.abs(percentageTotal - 100) > 0.01) {
-        toast.error(`Percentages must total 100% (currently ${percentageTotal.toFixed(1)}%)`);
-        return;
-      }
-      splits = {};
-      Object.entries(customSplits).forEach(([contact, percentage]) => {
-        splits[contact] = (totalAmount * (parseFloat(percentage) || 0)) / 100;
-      });
-      if (!splits["You"]) splits["You"] = 0;
-    }
-
-    setLoading(true);
+  const handleSubmit = async () => {
     try {
-      const expense = {
-        description,
-        totalAmount,
-        currency,
-        paidBy: "You",
-        groupId: 1,
-        items: [{
-          name: description,
-          price: totalAmount,
-          quantity: 1,
-          assignedTo: ["You", ...selectedContacts]
-        }],
-        splits
-      };
+      setLoading(true);
 
-      await expenseService.create(expense);
-      toast.success("Expense added successfully!");
+      // Validation
+      if (!description.trim()) {
+        toast.error('Please enter a description');
+        return;
+      }
+      
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        toast.error('Please enter a valid amount');
+        return;
+      }
+
+      if (!selectedGroup) {
+        toast.error('Please select a group');
+        return;
+      }
+
+      if (selectedContacts.length === 0) {
+        toast.error('Please add at least one contact');
+        return;
+      }
+
+      // Calculate splits based on split method
+      let splits = {};
+
+      if (splitMethod === "equal") {
+        const splitAmount = parsedAmount / (selectedContacts.length + 1);
+        splits = { "You": splitAmount };
+        selectedContacts.forEach(contact => {
+          splits[contact] = splitAmount;
+        });
+      } else if (splitMethod === "itemized") {
+        const customTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+        if (Math.abs(customTotal - parsedAmount) > 0.01) {
+          toast.error(`Itemized amounts (${customTotal.toFixed(2)}) must equal total amount (${parsedAmount.toFixed(2)})`);
+          return;
+        }
+        splits = { ...customSplits };
+        if (!splits["You"]) splits["You"] = 0;
+      } else if (splitMethod === "percentage") {
+        const percentageTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+        if (Math.abs(percentageTotal - 100) > 0.01) {
+          toast.error(`Percentages must total 100% (currently ${percentageTotal.toFixed(1)}%)`);
+          return;
+        }
+        splits = {};
+        Object.entries(customSplits).forEach(([contact, percentage]) => {
+          splits[contact] = (parsedAmount * (parseFloat(percentage) || 0)) / 100;
+        });
+        if (!splits["You"]) splits["You"] = 0;
+      }
+
+      // Create expense via service
+      await expenseService.create({
+        description: description.trim(),
+        totalAmount: parsedAmount,
+        paidBy: "You",
+        category: category,
+        groupId: selectedGroup.Id,
+        splits: splits
+      });
+
+      toast.success('Expense added successfully!');
       onSuccess?.();
       handleClose();
     } catch (error) {
-      toast.error("Failed to add expense");
-      console.error(error);
+      console.error('Error creating expense:', error);
+      toast.error('Failed to add expense. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
-  const handleClose = () => {
-setDescription("");
+const handleClose = () => {
+    setDescription("");
     setAmount("");
     setCurrency("INR");
     setCategory("Food");
     setSelectedContacts([]);
+    setSelectedGroup(null);
     setContactInput("");
     setSplitMethod("equal");
     setCustomSplits({});
+    setShowCategoryDropdown(false);
     onClose();
   };
-
   const categories = [
     { value: "Food", icon: "ShoppingCart" },
     { value: "Transport", icon: "Car" },

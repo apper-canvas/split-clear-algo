@@ -13,16 +13,16 @@ const expenseService = {
     await delay();
     const expense = expenses.find(e => e.Id === parseInt(id));
     return expense ? { ...expense } : null;
-  },
+},
 
-create: async (expense) => {
+  create: async (expense) => {
     await delay();
     const maxId = expenses.length > 0 ? Math.max(...expenses.map(e => e.Id)) : 0;
     const newExpense = {
       ...expense,
       Id: maxId + 1,
       category: expense.category || "Other",
-      date: new Date().toISOString(),
+      date: expense.date || new Date().toISOString(),
       settled: false,
       createdOffline: false,
       synced: true
