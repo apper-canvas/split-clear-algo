@@ -110,13 +110,11 @@ parseNaturalLanguage(sampleInput);
     setSelectedContacts(selectedContacts.filter(c => c !== contact));
   };
 
-  const handleQuickGroup = (group) => {
+const handleQuickGroup = (group) => {
     const contacts = group.members.filter(m => m !== "You");
     setSelectedContacts(contacts);
     setCurrency(group.currency);
-};
-};
-
+  };
   const handleSubmit = async () => {
     try {
       setLoading(true);
