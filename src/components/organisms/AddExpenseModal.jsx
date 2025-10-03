@@ -10,7 +10,7 @@ import expenseService from "@/services/api/expenseService";
 const AddExpenseModal = ({ isOpen, onClose, onSuccess }) => {
   const [isListening, setIsListening] = useState(false);
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+const [amount, setAmount] = useState("");
 const [currency, setCurrency] = useState("INR");
   const [category, setCategory] = useState("Food");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -18,6 +18,8 @@ const [currency, setCurrency] = useState("INR");
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [contactInput, setContactInput] = useState("");
+  const [splitMethod, setSplitMethod] = useState("equal");
+  const [customSplits, setCustomSplits] = useState({});
   useEffect(() => {
     if (isOpen) {
       loadGroups();
@@ -108,23 +110,47 @@ const handleSubmit = async () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const splitAmount = parseFloat(amount) / (selectedContacts.length + 1);
-      const splits = { "You": splitAmount };
+    const totalAmount = parseFloat(amount);
+    let splits = {};
+
+    if (splitMethod === "equal") {
+      const splitAmount = totalAmount / (selectedContacts.length + 1);
+      splits = { "You": splitAmount };
       selectedContacts.forEach(contact => {
         splits[contact] = splitAmount;
       });
+    } else if (splitMethod === "itemized") {
+      const customTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+      if (Math.abs(customTotal - totalAmount) > 0.01) {
+        toast.error(`Itemized amounts (${customTotal.toFixed(2)}) must equal total amount (${totalAmount.toFixed(2)})`);
+        return;
+      }
+      splits = { ...customSplits };
+      if (!splits["You"]) splits["You"] = 0;
+    } else if (splitMethod === "percentage") {
+      const percentageTotal = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+      if (Math.abs(percentageTotal - 100) > 0.01) {
+        toast.error(`Percentages must total 100% (currently ${percentageTotal.toFixed(1)}%)`);
+        return;
+      }
+      splits = {};
+      Object.entries(customSplits).forEach(([contact, percentage]) => {
+        splits[contact] = (totalAmount * (parseFloat(percentage) || 0)) / 100;
+      });
+      if (!splits["You"]) splits["You"] = 0;
+    }
 
+    setLoading(true);
+    try {
       const expense = {
         description,
-        totalAmount: parseFloat(amount),
+        totalAmount,
         currency,
         paidBy: "You",
         groupId: 1,
         items: [{
           name: description,
-          price: parseFloat(amount),
+          price: totalAmount,
           quantity: 1,
           assignedTo: ["You", ...selectedContacts]
         }],
@@ -150,6 +176,8 @@ setDescription("");
     setCategory("Food");
     setSelectedContacts([]);
     setContactInput("");
+    setSplitMethod("equal");
+    setCustomSplits({});
     onClose();
   };
 
@@ -346,29 +374,109 @@ setDescription("");
                   ))}
                 </div>
               </div>
+</div>
+
+            {/* Split Method Selector */}
+            <div>
+              <label className="block text-body font-medium text-primary mb-3">
+                Split method
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setSplitMethod("equal");
+                    setCustomSplits({});
+                  }}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    splitMethod === "equal"
+                      ? "border-accent bg-accent/5"
+                      : "border-secondary/20 hover:border-accent/30"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ApperIcon name="Divide" size={24} className={splitMethod === "equal" ? "text-accent" : "text-secondary"} />
+                  <span className={`text-caption font-medium ${splitMethod === "equal" ? "text-accent" : "text-secondary"}`}>
+                    Equal
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setSplitMethod("itemized");
+                    const initialSplits = { "You": 0 };
+                    selectedContacts.forEach(contact => {
+                      initialSplits[contact] = 0;
+                    });
+                    setCustomSplits(initialSplits);
+                  }}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    splitMethod === "itemized"
+                      ? "border-accent bg-accent/5"
+                      : "border-secondary/20 hover:border-accent/30"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ApperIcon name="List" size={24} className={splitMethod === "itemized" ? "text-accent" : "text-secondary"} />
+                  <span className={`text-caption font-medium ${splitMethod === "itemized" ? "text-accent" : "text-secondary"}`}>
+                    Itemized
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setSplitMethod("percentage");
+                    const initialSplits = { "You": 0 };
+                    selectedContacts.forEach(contact => {
+                      initialSplits[contact] = 0;
+                    });
+                    setCustomSplits(initialSplits);
+                  }}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    splitMethod === "percentage"
+                      ? "border-accent bg-accent/5"
+                      : "border-secondary/20 hover:border-accent/30"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ApperIcon name="Percent" size={24} className={splitMethod === "percentage" ? "text-accent" : "text-secondary"} />
+                  <span className={`text-caption font-medium ${splitMethod === "percentage" ? "text-accent" : "text-secondary"}`}>
+                    Percentage
+                  </span>
+                </motion.button>
+              </div>
+              {splitMethod === "itemized" && (
+                <p className="text-caption text-secondary mt-2">
+                  Enter custom amounts for each person
+                </p>
+              )}
+              {splitMethod === "percentage" && (
+                <p className="text-caption text-secondary mt-2">
+                  Enter percentages (must total 100%)
+                </p>
+              )}
             </div>
 
-            {amount && selectedContacts.length > 0 && (
+{amount && selectedContacts.length > 0 && (
               <motion.div
                 className="p-4 bg-accent/5 rounded-xl"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <p className="text-caption text-secondary mb-2">Split breakdown</p>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-body">
+                <p className="text-caption text-secondary mb-2">
+                  {splitMethod === "equal" && "Split breakdown (equal)"}
+                  {splitMethod === "itemized" && "Itemized amounts"}
+                  {splitMethod === "percentage" && "Percentage breakdown"}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-body">
                     <span className="text-primary">You</span>
-                    <span className="font-semibold text-accent">
-                      {new Intl.NumberFormat("en-IN", {
-                        style: "currency",
-                        currency: currency,
-                        minimumFractionDigits: 2
-                      }).format(parseFloat(amount) / (selectedContacts.length + 1))}
-                    </span>
-                  </div>
-                  {selectedContacts.map((contact) => (
-                    <div key={contact} className="flex justify-between text-body">
-                      <span className="text-primary">{contact}</span>
+                    {splitMethod === "equal" ? (
                       <span className="font-semibold text-accent">
                         {new Intl.NumberFormat("en-IN", {
                           style: "currency",
@@ -376,9 +484,106 @@ setDescription("");
                           minimumFractionDigits: 2
                         }).format(parseFloat(amount) / (selectedContacts.length + 1))}
                       </span>
+                    ) : splitMethod === "itemized" ? (
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={customSplits["You"] || ""}
+                        onChange={(e) => setCustomSplits({ ...customSplits, "You": e.target.value })}
+                        className="w-24 px-2 py-1 text-right border border-secondary/20 rounded text-caption focus:outline-none focus:border-accent"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="100"
+                          placeholder="0"
+                          value={customSplits["You"] || ""}
+                          onChange={(e) => setCustomSplits({ ...customSplits, "You": e.target.value })}
+                          className="w-16 px-2 py-1 text-right border border-secondary/20 rounded text-caption focus:outline-none focus:border-accent"
+                        />
+                        <span className="text-accent font-semibold">%</span>
+                        <span className="text-caption text-secondary">
+                          ({new Intl.NumberFormat("en-IN", {
+                            style: "currency",
+                            currency: currency,
+                            minimumFractionDigits: 0
+                          }).format((parseFloat(amount) * (parseFloat(customSplits["You"]) || 0)) / 100)})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {selectedContacts.map((contact) => (
+                    <div key={contact} className="flex justify-between items-center text-body">
+                      <span className="text-primary">{contact}</span>
+                      {splitMethod === "equal" ? (
+                        <span className="font-semibold text-accent">
+                          {new Intl.NumberFormat("en-IN", {
+                            style: "currency",
+                            currency: currency,
+                            minimumFractionDigits: 2
+                          }).format(parseFloat(amount) / (selectedContacts.length + 1))}
+                        </span>
+                      ) : splitMethod === "itemized" ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={customSplits[contact] || ""}
+                          onChange={(e) => setCustomSplits({ ...customSplits, [contact]: e.target.value })}
+                          className="w-24 px-2 py-1 text-right border border-secondary/20 rounded text-caption focus:outline-none focus:border-accent"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="100"
+                            placeholder="0"
+                            value={customSplits[contact] || ""}
+                            onChange={(e) => setCustomSplits({ ...customSplits, [contact]: e.target.value })}
+                            className="w-16 px-2 py-1 text-right border border-secondary/20 rounded text-caption focus:outline-none focus:border-accent"
+                          />
+                          <span className="text-accent font-semibold">%</span>
+                          <span className="text-caption text-secondary">
+                            ({new Intl.NumberFormat("en-IN", {
+                              style: "currency",
+                              currency: currency,
+                              minimumFractionDigits: 0
+                            }).format((parseFloat(amount) * (parseFloat(customSplits[contact]) || 0)) / 100)})
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
+                {splitMethod === "itemized" && (() => {
+                  const total = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+                  const diff = parseFloat(amount) - total;
+                  return Math.abs(diff) > 0.01 ? (
+                    <p className="text-caption text-warning mt-2">
+                      {diff > 0 ? `Remaining: ${diff.toFixed(2)}` : `Over by: ${Math.abs(diff).toFixed(2)}`}
+                    </p>
+                  ) : (
+                    <p className="text-caption text-success mt-2">✓ Amounts balanced</p>
+                  );
+                })()}
+                {splitMethod === "percentage" && (() => {
+                  const total = Object.values(customSplits).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+                  return Math.abs(total - 100) > 0.01 ? (
+                    <p className="text-caption text-warning mt-2">
+                      Total: {total.toFixed(1)}% {total < 100 ? `(need ${(100 - total).toFixed(1)}% more)` : `(${(total - 100).toFixed(1)}% over)`}
+                    </p>
+                  ) : (
+                    <p className="text-caption text-success mt-2">✓ 100% allocated</p>
+                  );
+                })()}
               </motion.div>
             )}
 
