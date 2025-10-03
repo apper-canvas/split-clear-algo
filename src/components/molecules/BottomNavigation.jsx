@@ -1,15 +1,19 @@
-import { NavLink } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import React from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useState } from "react";
 import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
 
-const BottomNavigation = ({ isOpen, setIsOpen }) => {
+const BottomNavigation = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
   const navItems = [
-    { to: "/", icon: "Home", label: "Dashboard" },
-    { to: "/groups", icon: "Users", label: "Groups" },
-    { to: "/history", icon: "List", label: "History" },
-    { to: "/settings", icon: "Settings", label: "Settings" }
+    { path: "/dashboard", icon: "Home", label: "Home" },
+    { path: "/groups", icon: "Users", label: "Groups" },
+    { path: "/group-balances", icon: "Wallet", label: "Balances" },
+    { path: "/history", icon: "Clock", label: "History" },
   ];
 
   const handleNavClick = () => {
@@ -58,11 +62,11 @@ const BottomNavigation = ({ isOpen, setIsOpen }) => {
             className="fixed top-0 left-0 bottom-0 w-64 bg-surface border-r border-secondary/10 z-50 shadow-xl"
           >
             <div className="flex flex-col h-full pt-20 px-4">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={handleNavClick}
+{navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={handleNavClick}
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-4 px-4 py-4 rounded-xl transition-all min-h-[56px] mb-2",

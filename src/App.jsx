@@ -1,37 +1,43 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navigate, Route, BrowserRouter, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { useState } from "react";
-import Dashboard from "@/components/pages/Dashboard";
-import Groups from "@/components/pages/Groups";
-import Insights from "@/components/pages/Insights";
-import History from "@/components/pages/History";
-import Settings from "@/components/pages/Settings";
-import BottomNavigation from "@/components/molecules/BottomNavigation";
-import FloatingActionButton from "@/components/organisms/FloatingActionButton";
-import AddExpenseModal from "@/components/organisms/AddExpenseModal";
+import GroupBalanceSummary from "@/components/pages/GroupBalanceSummary";
+import React, { useState } from "react";
 import SyncIndicator from "@/components/molecules/SyncIndicator";
+import BottomNavigation from "@/components/molecules/BottomNavigation";
+import History from "@/components/pages/History";
+import Insights from "@/components/pages/Insights";
+import Groups from "@/components/pages/Groups";
+import Dashboard from "@/components/pages/Dashboard";
+import Settings from "@/components/pages/Settings";
+import AddExpenseModal from "@/components/organisms/AddExpenseModal";
+import FloatingActionButton from "@/components/organisms/FloatingActionButton";
 
 function App() {
-const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState("synced");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleExpenseAdded = () => {
-    window.location.reload();
+    setSyncStatus("syncing");
+    setTimeout(() => {
+      setSyncStatus("synced");
+    }, 1000);
   };
 
   return (
-    <BrowserRouter>
+<BrowserRouter>
       <div className="min-h-screen bg-background font-body">
         <SyncIndicator status={syncStatus} />
         
 <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/group-balances" element={<GroupBalanceSummary />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
-</Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
         <BottomNavigation isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
         <FloatingActionButton onClick={() => setIsAddExpenseOpen(true)} />
