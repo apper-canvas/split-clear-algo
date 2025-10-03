@@ -273,7 +273,7 @@ setDescription("");
                     size={18} 
                   />
                 </button>
-                <AnimatePresence>
+<AnimatePresence>
                   {showCategoryDropdown && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -299,7 +299,6 @@ setDescription("");
                       ))}
                     </motion.div>
                   )}
-)}
                 </AnimatePresence>
               </div>
             </div>
